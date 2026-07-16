@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 512 512"
+     width="512"
+     height="512"
+     role="img"
+     aria-labelledby="title desc">
+  <title id="title">AXON-SRA project mark</title>
+  <desc id="desc">A geometric A and X monogram with three semantic data paths converging on a central node.</desc>
+
+  <circle cx="256" cy="256" r="238" fill="#ffffff" stroke="#0b0f14" stroke-width="12"/>
+
+  <!-- Geometric A -->
+  <path fill="#0b0f14" fill-rule="evenodd"
+        d="M108 376 224 112h56l116 264h-62l-25-61H195l-25 61h-62Zm110-116h68l-34-84-34 84Z"/>
+
+  <!-- X / reconstruction path -->
+  <path fill="#0b0f14"
+        d="M284 272 372 144h72l-115 128 115 128h-72l-88-128Z"/>
+
+  <!-- Three bounded semantic streams -->
+  <g fill="none" stroke="#0b0f14" stroke-width="18" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M72 230h108l38 42h54"/>
+    <path d="M72 272h200"/>
+    <path d="M72 314h108l38-42"/>
+  </g>
+
+  <g fill="#0b0f14">
+    <rect x="48" y="218" width="24" height="24" rx="2"/>
+    <rect x="48" y="260" width="24" height="24" rx="2"/>
+    <rect x="48" y="302" width="24" height="24" rx="2"/>
+    <circle cx="278" cy="272" r="30"/>
+  </g>
+
+  <circle cx="278" cy="272" r="42" fill="none" stroke="#ffffff" stroke-width="12"/>
+</svg>
