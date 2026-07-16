@@ -2,21 +2,23 @@
 
 All notable public changes to AXON-SRA will be documented here.
 
-The project is currently pre-release and does not yet provide API or binary compatibility guarantees.
+The project is pre-release and does not yet provide binary, configuration, profile, or API compatibility guarantees.
 
 ## [Unreleased]
 
-### Added
+### Repository presentation
 
-- Professional repository documentation structure.
-- MkDocs Material documentation site.
-- GitHub Pages deployment workflow.
-- Architecture, status, validation, compatibility, and roadmap documentation.
-- Contribution, security, and conduct policies.
-- Structured issue and pull-request templates.
+- Reframed the public repository around the final AXON-SRA product objective.
+- Added GitHub-native final architecture and runtime-pipeline documentation.
+- Added semantic-reconstruction, backend-interface, and execution-mode documentation.
+- Added the v1.0 roadmap, release model, configuration model, and compatibility policy.
+- Added a true vector project mark and social-preview asset.
+- Clarified the difference between final target capabilities and current implementation status.
 
 ### Development baseline
 
-- Layered frame, resource, scene, scheduling, and shader-semantic analysis.
-- Phase 8.2 indexed producer provenance validation.
-- Phase 9 bounded `BuiltIn Position` backward dataflow in active development.
+- Layered observation, frame, resource, routing, scheduling, and shader-semantic infrastructure.
+- Indexed producer provenance.
+- Bounded and interprocedural position dataflow.
+- Position constant-buffer binding and value-analysis work.
+- Automatic position-constant classification in active development.
