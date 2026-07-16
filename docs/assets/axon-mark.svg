@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">AXON-SRA</title>
+  <desc id="desc">A geometric A and X monogram</desc>
+  <circle cx="128" cy="128" r="120" fill="#ffffff"/>
+  <path d="M49 190 112 50h31L207 190h-34l-15-36H95l-15 36H49Zm58-66h39l-19-48-20 48Z" fill="#0b0f14"/>
+  <path d="m84 190 42-58 18 27-22 31H84Zm64-140h39l-43 59-18-27 22-32Z" fill="#0b0f14"/>
+  <circle cx="128" cy="128" r="119" fill="none" stroke="#0b0f14" stroke-width="2"/>
+</svg>
