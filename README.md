@@ -33,6 +33,12 @@
   <a href="CONTRIBUTING.md">Contributing</a>
 </p>
 
+> [!NOTE]
+> **Repository status:** This repository currently contains the public
+> documentation and project architecture. The source tree is being cleaned,
+> validated, and prepared for publication. No end-user build or release is
+> available yet.
+
 > [!IMPORTANT]
 > AXON-SRA is an active research prototype. It is **not** a production-ready upscaler, a universal game patch, or an official DXVK feature. Interfaces, heuristics, file layouts, and observed metrics may change without compatibility guarantees.
 
