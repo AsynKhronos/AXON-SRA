@@ -1,167 +1,239 @@
 <p align="center">
-  <img src="docs/assets/axon-mark.svg" width="112" alt="AXON-SRA logo">
+  <img src="docs/assets/axon-mark.svg" width="128" alt="AXON-SRA project mark">
 </p>
 
 <h1 align="center">AXON-SRA</h1>
 
 <p align="center">
-  <strong>Semantic Render Analysis for DXVK</strong>
+  <strong>Autonomous Semantic Render Analysis and Temporal Reconstruction for DXVK</strong>
 </p>
 
 <p align="center">
-  Experimental infrastructure for reconstructing render semantics and temporal inputs from D3D11 workloads translated through DXVK.
+  Reconstructing the rendering semantics and temporal inputs that modern super-resolution backends normally receive from native game integrations.
 </p>
 
 <p align="center">
-  <img alt="Project status" src="https://img.shields.io/badge/status-research%20prototype-orange">
-  <img alt="Primary API" src="https://img.shields.io/badge/primary%20API-D3D11%20%E2%86%92%20Vulkan-6f42c1">
-  <img alt="C++ standard" src="https://img.shields.io/badge/C%2B%2B-23-00599C">
+  <img alt="Status" src="https://img.shields.io/badge/status-research%20prototype-orange">
+  <img alt="Target path" src="https://img.shields.io/badge/target-D3D11%20%E2%86%92%20DXVK%20%E2%86%92%20Vulkan-6f42c1">
+  <img alt="Architecture" src="https://img.shields.io/badge/architecture-backend--neutral-2563eb">
+  <img alt="Language" src="https://img.shields.io/badge/C%2B%2B-23-00599C">
   <a href="LICENSE">
     <img alt="License" src="https://img.shields.io/badge/license-see%20LICENSE-informational">
   </a>
 </p>
 
 <p align="center">
-  <a href="docs/README.md">Documentation</a>
+  <a href="docs/vision.md">Vision</a>
   ·
   <a href="docs/architecture.md">Architecture</a>
   ·
-  <a href="docs/status.md">Development status</a>
+  <a href="docs/runtime-pipeline.md">Runtime pipeline</a>
   ·
   <a href="docs/roadmap.md">Roadmap</a>
+  ·
+  <a href="docs/status.md">Status</a>
   ·
   <a href="CONTRIBUTING.md">Contributing</a>
 </p>
 
 > [!NOTE]
-> **Repository status:** This repository currently contains the public
-> documentation and project architecture. The source tree is being cleaned,
-> validated, and prepared for publication. No end-user build or release is
-> available yet.
+> **Publication status:** This repository currently presents the public architecture, product vision, engineering principles, and validation model. The source tree is being cleaned and validated before publication. No end-user binary release is available yet.
 
 > [!IMPORTANT]
-> AXON-SRA is an active research prototype. It is **not** a production-ready upscaler, a universal game patch, or an official DXVK feature. Interfaces, heuristics, file layouts, and observed metrics may change without compatibility guarantees.
+> AXON-SRA is an independent research project. The capabilities described below define the **target system**, not a claim that every feature is already production-ready or universally compatible.
 
-## What AXON-SRA is
+## Mission
 
-Temporal reconstruction systems require more than a low-resolution color buffer. They commonly depend on motion, depth, jitter, exposure, history, disocclusion, and other frame-to-frame signals. D3D11 applications do not expose these semantics through a standardized interface.
+Modern temporal super-resolution systems require semantic inputs such as depth, motion, jitter, exposure, frame history, disocclusion information, and current-versus-previous camera state. D3D11 applications do not expose these inputs through one standardized reconstruction interface.
 
-AXON-SRA investigates whether those signals can be reconstructed inside DXVK by combining:
+**AXON-SRA is designed to recover that missing semantic layer inside DXVK-GPLALL.**
 
-- stable resource and view identities;
-- per-frame observation journals and immutable frame snapshots;
-- resource-flow and producer-provenance analysis;
-- scene and presentation routing;
-- shader semantic caching;
-- bounded SPIR-V backward dataflow;
-- confidence-based classification rather than hard-coded resource IDs.
+The project analyzes the translated rendering workload, identifies the present-bound main scene route, reconstructs temporal inputs with explicit confidence and provenance, and exposes them through a backend-neutral super-resolution contract.
 
-The long-term objective is to expose validated temporal inputs through a backend-neutral reconstruction interface.
+## Final system objective
 
-## Current scope
+The completed AXON-SRA runtime is intended to:
 
-| Area | Current position |
-|---|---|
-| Graphics API | D3D11 is the primary acceptance target |
-| Translation layer | Integrated into a DXVK-GPLALL development tree |
-| Analysis model | Resource, frame, scene, shader, and provenance layers |
-| Current milestone | Phase 9 — bounded `BuiltIn Position` backward dataflow |
-| Reconstruction backend | Planned; no public production backend yet |
-| Validation titles | Persona 5 Royal and Subnautica |
-| D3D9 | Not a current acceptance criterion |
+- identify the primary scene and presentation route without modifying the original game;
+- bind analysis to the exact pass occurrence, shader set, resources, and constant-buffer state;
+- reconstruct depth, camera state, projection data, current and previous positions, native motion, and jitter;
+- synthesize validated temporal reconstruction inputs;
+- classify input quality and backend capability;
+- select a native-temporal, hybrid-temporal, or spatial fallback path;
+- dispatch compatible workloads to FSR, XeSS, DLSS, or an experimental FSR 4 / D3D12 interop path;
+- preserve bounded execution, explicit ambiguity handling, and reproducible diagnostics.
 
-## Architecture
+## End-to-end architecture
 
 ```mermaid
-flowchart LR
-    A[D3D11 workload] --> B[DXVK translation]
-    B --> C[Controlled observation hooks]
-    C --> D[Frame journal]
-    D --> E[Frame model]
-    E --> F[Sealed frame]
-    F --> G[Resource graph]
-    G --> H[Scene router]
-    H --> I[Analysis scheduler]
-    I --> J[Shader semantic cache]
-    J --> K[Bounded SPIR-V dataflow]
-    K --> L[Semantic candidates]
-    L -. future .-> M[Temporal input synthesis]
-    M -. future .-> N[DLSS / FSR / XeSS or custom backend]
+flowchart TD
+    A[D3D11 application] --> B[DXVK-GPLALL translation layer]
+    B --> C[Semantic Frame Router]
+    C --> D[Present-bound Main Scene Route]
+    D --> E[Exact Pass Occurrence]
+    E --> F[Shader, Resource and CB Binding Analysis]
+
+    F --> G1[Depth Resolver]
+    F --> G2[Matrix and Camera Resolver]
+    F --> G3[Native Motion Resolver]
+    F --> G4[Jitter Resolver]
+    F --> G5[History and Exposure Resolver]
+
+    G1 --> H[SR Input Synthesizer]
+    G2 --> H
+    G3 --> H
+    G4 --> H
+    G5 --> H
+
+    H --> I[Capability and Confidence Classifier]
+
+    I --> J1[Native Temporal Path]
+    I --> J2[Hybrid Temporal Path]
+    I --> J3[Spatial Fallback Path]
+
+    J1 --> K[Backend-neutral SR Interface]
+    J2 --> K
+    J3 --> K
+
+    K --> L1[FSR]
+    K --> L2[XeSS]
+    K --> L3[DLSS]
+    K --> L4[Experimental FSR 4 / D3D12 Interop]
+
+    L1 --> M[Vulkan presentation]
+    L2 --> M
+    L3 --> M
+    L4 --> M
 ```
 
-The design intentionally avoids a single monolithic manager. Each layer owns a narrow responsibility and communicates through explicit data structures.
+## System pillars
 
-## Core components
-
-| Component | Responsibility |
+| Pillar | Responsibility |
 |---|---|
-| `sr_ids` | Stable identifiers for observed render entities |
-| `sr_frame_journal` | Bounded event capture for the active frame |
-| `sr_frame_model` | Normalized frame-level observations |
-| `sr_sealed_frame` | Immutable analysis snapshot |
-| `sr_resource_graph` | Resource relationships and producer provenance |
-| `sr_scene_router` | Scene/presentation segmentation and routing |
-| `sr_analysis_scheduler` | Controlled analysis cadence and workload |
-| `sr_shader_semantic_cache` | Cached shader-level semantic evidence |
-| `sr_position_dataflow` | Bounded backward tracing from exact position stores |
+| **Observation** | Capture bounded, chronological evidence from DXVK without turning the hot path into a monolithic analysis engine |
+| **Routing** | Identify the present-bound main scene and isolate the exact render-pass occurrence that matters |
+| **Semantic reconstruction** | Infer depth, matrices, camera state, motion, jitter, history, and other temporal roles |
+| **Input synthesis** | Convert heterogeneous evidence into a validated, backend-neutral temporal input set |
+| **Confidence classification** | Decide whether a workload qualifies for native temporal, hybrid temporal, or spatial reconstruction |
+| **Backend execution** | Dispatch the validated workload to FSR, XeSS, DLSS, or a compatible fallback |
+| **Diagnostics and profiles** | Preserve provenance, expose structured logs, and support optional per-title semantic profiles |
 
-More detail is available in the [architecture documentation](docs/architecture.md).
+## Reconstruction inputs
 
-## Development status
+The final input contract is intended to support:
 
-The Phase 8.2 validation baseline completed a 6,144-frame run with:
+| Input | Target source |
+|---|---|
+| Current color | Present-bound scene route |
+| Output dimensions | Presentation and target configuration |
+| Depth | Resource-role and producer/consumer analysis |
+| Motion | Native motion target, reconstructed position delta, or hybrid synthesis |
+| Current / previous transforms | Constant-buffer observation and matrix classification |
+| Jitter | Multi-frame projection and viewport correlation |
+| Exposure | Shader/resource semantics and frame-to-frame behavior |
+| Reactive / disocclusion information | Resource relationships, material behavior, and confidence heuristics |
+| History | Cross-frame resource provenance and stable semantic profiles |
 
-- `2,183,445` indexed provenance lookups;
-- `437,284` scanned index entries;
-- approximately `0.20` scanned entries per lookup;
-- `0` memory ambiguities;
-- `0` dropped handoffs;
-- `0` dropped journal events.
+## Execution modes
 
-These are engineering diagnostics, **not image-quality or performance claims**. See [Development status](docs/status.md) and [Validation](docs/validation.md).
+AXON-SRA is designed around three explicit execution modes:
 
-## Design principles
+| Mode | Requirement | Intended behavior |
+|---|---|---|
+| **Native Temporal** | Required temporal inputs are reliable and backend-compatible | Use the highest-confidence temporal path |
+| **Hybrid Temporal** | Some inputs are native while others can be reconstructed safely | Combine native and synthesized evidence with explicit confidence limits |
+| **Spatial Fallback** | Temporal evidence is incomplete or ambiguous | Preserve compatibility without fabricating authoritative temporal data |
+
+Read [Execution modes](docs/execution-modes.md) for the detailed decision model.
+
+## Backend strategy
+
+The reconstruction layer is backend-neutral by design.
+
+| Backend | Final role |
+|---|---|
+| **FSR** | First open temporal backend and reference implementation path |
+| **XeSS** | Cross-vendor temporal backend behind the common contract |
+| **DLSS** | NVIDIA-specific backend when hardware, SDK, and input requirements are satisfied |
+| **FSR 4 / D3D12 interop** | Experimental interop path using DXVK's D3D11-on-12 / Vulkan resource bridge where technically and legally viable |
+| **Spatial fallback** | Compatibility path when temporal requirements cannot be met safely |
+
+Backend presence does not override semantic confidence. AXON-SRA must reject or downgrade a path when required inputs are missing or unreliable.
+
+## Final deliverable
+
+The planned public release is intended to include:
+
+- a DXVK-GPLALL-based runtime with integrated semantic render analysis;
+- automatic D3D11 scene and temporal-input discovery;
+- backend-neutral temporal input and dispatch interfaces;
+- selectable FSR, XeSS, and DLSS execution paths;
+- an experimental FSR 4 / D3D12 interop path;
+- automatic capability and confidence-based fallback;
+- optional per-title semantic profiles;
+- structured diagnostics and validation logs;
+- reproducible source builds;
+- versioned binary releases;
+- compatibility documentation for validated D3D11 titles.
+
+## Engineering principles
 
 1. **Observe before modifying.** Analysis must be measurable before reconstruction is introduced.
-2. **Use stable semantics, not transient IDs.** Resource handles alone are not portable across runs or titles.
-3. **Bound every analysis.** Dataflow depth, node count, journal size, and scan cost must remain finite.
-4. **Preserve provenance.** Every semantic claim should be traceable to observations and confidence evidence.
-5. **Fail closed.** Ambiguous signals remain candidates; they are not silently promoted to authoritative inputs.
-6. **Minimize DXVK intrusion.** Integration should use a small number of controlled hooks and explicit ownership.
+2. **Bind to the exact occurrence.** A shader or resource is not meaningful without its concrete frame, pass, and binding context.
+3. **Use stable semantics, not transient handles.** Runtime IDs alone are not portable across frames, runs, or titles.
+4. **Bound every analysis.** Journals, graph traversal, dataflow depth, pointer resolution, and scheduling cost require explicit limits.
+5. **Preserve provenance.** Every semantic claim should remain traceable to evidence and confidence.
+6. **Fail closed.** Ambiguous evidence remains ambiguous; it is not promoted into authoritative temporal input.
+7. **Keep backends replaceable.** Semantic reconstruction must not be hard-wired to one vendor API.
+8. **Minimize DXVK intrusion.** Integration points should remain controlled, reviewable, and ownership-safe.
 
-## Repository state
+## Development and validation
 
-The repository remains under active development. Source publication, build instructions, and release artifacts should only be considered authoritative once the corresponding baseline is committed and tagged.
+The active implementation progresses from frame and resource observation through semantic reconstruction, temporal input synthesis, backend abstraction, backend integration, and final multi-game hardening.
 
-## Roadmap
+Primary validation workloads currently include:
 
-Near-term work is focused on:
+- **Persona 5 Royal** — D3D11 feature level 11_0;
+- **Subnautica** — D3D11 feature level 11_1.
 
-- completing bounded position-source dataflow;
-- classifying uniform-buffer, push-constant, and shader-input contributors;
-- identifying camera, projection, and jitter sources;
-- strengthening depth, history, motion, and presentation-role confidence;
-- defining a backend-neutral temporal input contract;
-- validating behavior across multiple D3D11 engines;
-- publishing a reproducible source and build baseline.
+A title is not considered supported merely because it launches. Compatibility requires stable observation, bounded cost, repeatable semantic classification, and reproducible diagnostics.
 
-See the full [roadmap](docs/roadmap.md).
+See:
+
+- [Development status](docs/status.md)
+- [Roadmap to v1.0](docs/roadmap.md)
+- [Validation model](docs/validation.md)
+- [Compatibility policy](docs/compatibility.md)
+
+## Non-goals and limits
+
+AXON-SRA does not promise that every D3D11 game can be integrated automatically. Some engines may not expose enough information for reliable temporal reconstruction.
+
+The project will not:
+
+- fabricate high-confidence motion or camera data from insufficient evidence;
+- claim native-integration image quality without comparative validation;
+- treat a successful launch as proof of semantic correctness;
+- hide backend downgrade or fallback decisions;
+- require modifications to the original game source code as its default operating model.
 
 ## Contributing
 
-Compatibility reports, reproducible logs, architecture review, and focused documentation corrections are useful. Large implementation pull requests should begin with an issue because internal interfaces are still moving.
+The most valuable contributions are reproducible compatibility reports, minimized shader/resource cases, bounded SPIR-V analysis improvements, architecture review, validation tooling, and documentation corrections.
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or pull request.
 
 ## Independence and trademarks
 
-AXON-SRA is an independent community research project. It is not affiliated with, endorsed by, or sponsored by the Khronos Group, DXVK, NVIDIA, AMD, Intel, Microsoft, or any game publisher.
+AXON-SRA is an independent community research project. It is not affiliated with, endorsed by, or sponsored by DXVK, the Khronos Group, Microsoft, NVIDIA, AMD, Intel, or any game publisher.
 
-All product names, trademarks, and registered trademarks are property of their respective owners.
+All product names, trademarks, and registered trademarks remain the property of their respective owners.
 
-## License
+## Licensing
 
-See [LICENSE](LICENSE). When the DXVK-based source tree is published, upstream license and attribution notices must remain intact.
+See [LICENSE](LICENSE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+When the DXVK-derived source tree is published, upstream copyright, license, and attribution notices will be preserved. Vendor SDKs and redistributable components remain subject to their own terms.
 
 ---
 
