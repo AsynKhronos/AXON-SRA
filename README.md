@@ -37,7 +37,7 @@
 </p>
 
 > [!NOTE]
-> **Publication status:** This repository currently presents the public architecture, product vision, engineering principles, and validation model. The source tree is being cleaned and validated before publication. No end-user binary release is available yet.
+> **Publication status:** This repository currently presents the public architecture, product vision, engineering principles, and validation model. The source tree is being cleaned and validated before publication. No end-user binary release is available yet. 
 
 > [!IMPORTANT]
 > AXON-SRA is an independent research project. The capabilities described below define the **target system**, not a claim that every feature is already production-ready or universally compatible.
